@@ -11,5 +11,8 @@ mov r1,#1
 lsl r1,#16
 str r1,[r0,#40]
 
+# Initialize stack?
+
 # Call kernel main
 b kmain
+

@@ -54,7 +54,7 @@ $(BUILD)%.o: $(SOURCE)%.s $(BUILD)
 	$(ARMGNU)-as -I $(SOURCE) $< -o $@
 
 $(BUILD)%.o: $(SOURCE)%.c $(BUILD)
-	$(ARMGNU)-gcc -c $< -o $@ 
+	$(ARMGNU)-gcc -O1 -c $< -o $@ 
 
 $(BUILD):
 	mkdir $@
