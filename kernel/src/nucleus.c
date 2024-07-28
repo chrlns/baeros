@@ -19,20 +19,19 @@ void mailbox_write(unsigned int mailbox, unsigned int message) {
 unsigned int mailbox_read(unsigned int mailbox) {
     unsigned int* status = (unsigned int*)MAILBOX_STATUS;
     unsigned int* read = (unsigned int*)MAILBOX_READ;
+    unsigned int data;
     
-    // Wait until status field has 0 in the 30th bit
-    while((*status & 0x40000000) != 0);
+    do {
+        // Wait until status field has 0 in the 30th bit
+        while((*status & 0x40000000) != 0);
     
-    // Read the message
-    unsigned int data = *read;
+        // Read the message + mailbox
+        data = *read;
+        
+    } while((data | 0xF) != mailbox); // Check if the message is for the correct 
+                                      // mailbox, if not try again
     
-    // Check if the message is for the correct mailbox, if not try again
-    unsigned int mailbox_actual = (data >> 28);
-    if (mailbox_actual != mailbox) {
-    
-    }
-    
-    return message;
+    return data >> 4; // The top 28 bit remain as message
 }
 
 /*
@@ -45,6 +44,12 @@ int screen_init(void) {
 }
 
 void kmain(void) {
+
+    // Virtual addresses in kernel mode will range between 0xC0000000 and 0xEFFFFFFF
+    
+    // Virtual addresses in user mode (i.e. seen by processes running) will range
+    // between 0x00000000 and 0xBFFFFFFF
+
     screen_init();
 
     for (;;);
