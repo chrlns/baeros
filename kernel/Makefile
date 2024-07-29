@@ -9,6 +9,8 @@
 # arm-bcm2708-linux-gnueabi.
 ARMGNU ?= arm-none-eabi
 
+FLAGS=-g
+
 # The intermediate directory for compiled object files.
 BUILD = build/
 
@@ -51,10 +53,10 @@ $(BUILD)output.elf : $(OBJECTS) $(LINKER)
 
 # Rules to make the object files.
 $(BUILD)%.o: $(SOURCE)%.s $(BUILD)
-	$(ARMGNU)-as -I $(SOURCE) $< -o $@
+	$(ARMGNU)-as $(FLAGS) -I $(SOURCE) $< -o $@
 
 $(BUILD)%.o: $(SOURCE)%.c $(BUILD)
-	$(ARMGNU)-gcc -O1 -c $< -o $@ 
+	$(ARMGNU)-gcc $(FLAGS) -O1 -c $< -o $@ 
 
 $(BUILD):
 	mkdir $@

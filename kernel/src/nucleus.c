@@ -39,7 +39,7 @@ unsigned int mailbox_read(unsigned int mailbox) {
  *  the video processor and the CPU.
  */
 int screen_init(void) {
-    int base = mailbox_base();
+    //int base = mailbox_base();
     return 0;
 }
 

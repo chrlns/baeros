@@ -3,8 +3,16 @@ BærOS
 
 ## Prerequisites
 
-   $ apt install gcc-arm-none-eabi
+   $ apt install gcc-arm-none-eabi gdb-multiarch
 
+## Debug Kernel
+
+  * Start QEMU with -s -S flags (qemu.sh)
+  * Start gdb with arm-none-eabi-gdb
+        * target remote localhost:1234
+        * file kernel/kernel.img
+        * break kmain
+        * continue
 
 ## Links
   * https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/os/index.html
