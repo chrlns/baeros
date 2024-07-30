@@ -9,13 +9,15 @@
 # arm-bcm2708-linux-gnueabi.
 ARMGNU ?= arm-none-eabi
 
-FLAGS=-g
+CCFLAGS=-O1
 
 # The intermediate directory for compiled object files.
 BUILD = build/
 
 # The directory in which source files are stored.
 SOURCE = src/
+
+INCLUDE = src/
 
 # The name of the output file to generate.
 TARGET = kernel.img
@@ -53,10 +55,10 @@ $(BUILD)output.elf : $(OBJECTS) $(LINKER)
 
 # Rules to make the object files.
 $(BUILD)%.o: $(SOURCE)%.s $(BUILD)
-	$(ARMGNU)-as $(FLAGS) -I $(SOURCE) $< -o $@
+	$(ARMGNU)-as -I $(SOURCE) $< -o $@
 
 $(BUILD)%.o: $(SOURCE)%.c $(BUILD)
-	$(ARMGNU)-gcc $(FLAGS) -O1 -c $< -o $@ 
+	$(ARMGNU)-gcc $(CCFLAGS) -I$(INCLUDE) -c $< -o $@ 
 
 $(BUILD):
 	mkdir $@
