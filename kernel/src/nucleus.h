@@ -1,3 +1,13 @@
+#define MBOX_CHANNEL_POWER       0
+#define MBOX_CHANNEL_FRAMEBUFFER 1
+#define MBOX_CHANNEL_LEDS        4
+
+#define MAILBOX_READ 0x2000B880
+#define MAILBOX_STATUS 0x2000B898
+#define MAILBOX_WRITE 0x2000B8A0
+
+#define MEM_NONCACHE_OFFSET 0x40000000
+
 struct __attribute__((aligned(4))) fb_info {
     unsigned int physicalWidth;   // #0 Physical Width
     unsigned int physicalHeight;  // #4 Physical Height

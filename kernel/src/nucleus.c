@@ -1,10 +1,8 @@
 #include <nucleus.h>
 
-#define MAILBOX_READ 0x2000B880
-#define MAILBOX_STATUS 0x2000B898
-#define MAILBOX_WRITE 0x2000B8A0
-
-#define MEM_NONCACHE_OFFSET 0x40000000
+#define	MBOX_MSG(chan, data)    (((data) & ~0xf) | ((chan) & 0xf))
+#define	MBOX_CHAN(msg)          ((msg) & 0xf)
+#define	MBOX_DATA(msg)          ((msg) & ~0xf)
 
 struct fb_info FrameBufferInfo = {
     .physicalWidth = 1024,
@@ -16,18 +14,18 @@ struct fb_info FrameBufferInfo = {
 
 int ErrCode = 0;
 
-void mailbox_write(unsigned int message, unsigned int mailbox) {
+void mailbox_write(unsigned int message, unsigned int channel) {
     unsigned int* status = (unsigned int*)MAILBOX_STATUS;
     unsigned int* write = (unsigned int*)MAILBOX_WRITE;
     
     // Wait until status field has 0 in the top bit
     while((*status & 0x80000000) != 0);
     
-    // Write mailbox (into lower 4bit) and message (into upper 28bit)
-    *write = (mailbox >> 28) | (message << 4);
+    // Write channel (into lower 4bit) and message (into upper 28bit)
+    *write = MBOX_MSG(channel, message);
 }
 
-unsigned int mailbox_read(unsigned int mailbox) {
+unsigned int mailbox_read(unsigned int channel) {
     unsigned int* status = (unsigned int*)MAILBOX_STATUS;
     unsigned int* read = (unsigned int*)MAILBOX_READ;
     unsigned int data;
@@ -39,10 +37,10 @@ unsigned int mailbox_read(unsigned int mailbox) {
         // Read the message + mailbox
         data = *read;
         
-    } while((data | 0xF) != mailbox); // Check if the message is for the correct 
-                                      // mailbox, if not try again
+    } while(MBOX_CHAN(data) != channel); // Check if the message is for the correct 
+                                      // channel, if not try again
     
-    return data >> 4; // The top 28 bit remain as message
+    return MBOX_DATA(data); // The top 28 bit remain as message
 }
 
 /*
@@ -52,9 +50,9 @@ unsigned int mailbox_read(unsigned int mailbox) {
 int screen_init(void) {
     
     // Write the FrameBufferInfo address to mailbox 1
-    mailbox_write((unsigned int)&FrameBufferInfo + MEM_NONCACHE_OFFSET, 1);
+    mailbox_write((unsigned int)&FrameBufferInfo + MEM_NONCACHE_OFFSET, MBOX_CHANNEL_FRAMEBUFFER);
     
-    return mailbox_read(1);
+    return mailbox_read(MBOX_CHANNEL_FRAMEBUFFER);
 }
 
 void kmain(void) {
