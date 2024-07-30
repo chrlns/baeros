@@ -1,3 +1,6 @@
+//#define NULL 0
+#include <stddef.h>
+
 #define MBOX_CHANNEL_POWER       0
 #define MBOX_CHANNEL_FRAMEBUFFER 1
 #define MBOX_CHANNEL_LEDS        4
@@ -8,6 +11,10 @@
 
 #define MEM_NONCACHE_OFFSET 0x40000000
 
+#define	MBOX_MSG(chan, data)    (((data) & ~0xf) | ((chan) & 0xf))
+#define	MBOX_CHAN(msg)          ((msg) & 0xf)
+#define	MBOX_DATA(msg)          ((msg) & ~0xf)
+
 struct __attribute__((aligned(4))) fb_info {
     unsigned int physicalWidth;   // #0 Physical Width
     unsigned int physicalHeight;  // #4 Physical Height
@@ -17,7 +24,7 @@ struct __attribute__((aligned(4))) fb_info {
     unsigned int bitDepth;        // #20 Bit Depth
     unsigned int x;               // #24 X
     unsigned int y;               // #28 Y
-    unsigned int gpuPointer;      // #32 GPU - Pointer
-    unsigned int gpuSize;         // #36 GPU - Size
+    unsigned char* address;       // #32 Address of the framebuffer
+    unsigned int size;            // #36 Size of the framebuffer
 };
 

@@ -1,15 +1,12 @@
 #include <nucleus.h>
 
-#define	MBOX_MSG(chan, data)    (((data) & ~0xf) | ((chan) & 0xf))
-#define	MBOX_CHAN(msg)          ((msg) & 0xf)
-#define	MBOX_DATA(msg)          ((msg) & ~0xf)
-
 struct fb_info FrameBufferInfo = {
-    .physicalWidth = 1024,
-    .physicalHeight = 768,
-    .virtualWidth = 1024,
-    .virtualHeight = 768,
-    .bitDepth = 16  
+    .physicalWidth = 800,
+    .physicalHeight = 600,
+    .virtualWidth = 800,
+    .virtualHeight = 600,
+    .bitDepth = 24,
+    .address = 0  
 };
 
 int ErrCode = 0;
@@ -38,7 +35,7 @@ unsigned int mailbox_read(unsigned int channel) {
         data = *read;
         
     } while(MBOX_CHAN(data) != channel); // Check if the message is for the correct 
-                                      // channel, if not try again
+                                         // channel, if not try again
     
     return MBOX_DATA(data); // The top 28 bit remain as message
 }
@@ -50,9 +47,26 @@ unsigned int mailbox_read(unsigned int channel) {
 int screen_init(void) {
     
     // Write the FrameBufferInfo address to mailbox 1
-    mailbox_write((unsigned int)&FrameBufferInfo + MEM_NONCACHE_OFFSET, MBOX_CHANNEL_FRAMEBUFFER);
+    mailbox_write((unsigned int)&FrameBufferInfo  + MEM_NONCACHE_OFFSET, MBOX_CHANNEL_FRAMEBUFFER);
     
     return mailbox_read(MBOX_CHANNEL_FRAMEBUFFER);
+}
+
+void screen_clear(void) {
+    unsigned char* buf = FrameBufferInfo.address;
+    if (buf == NULL) {
+        ErrCode = -2;
+        return;
+    }
+    
+    for (int y = 0; y < FrameBufferInfo.physicalHeight; y++) {
+        for (int x = 0; x < FrameBufferInfo.physicalWidth; x++) {
+            int offset = (y * FrameBufferInfo.physicalWidth + x) * 3;
+            buf[offset] = 0xFF;     // R
+            buf[offset + 1] = 0xFF; // G
+            buf[offset + 2] = 0xFF; // B
+        }
+    }
 }
 
 void kmain(void) {
@@ -65,11 +79,15 @@ void kmain(void) {
     if (screen_init() != 0) {
         // Could not init framebuffer
         ErrCode = -1;
+    } else {
+        screen_clear();
     }
 
     if (ErrCode != 0) {
         return;
     }
+    
+    
 
     for (;;);
 }
