@@ -6,9 +6,9 @@
 #define MBOX_CHANNEL_LEDS        4
 
 #define MAILBOX_BASE    0x2000B880
-#define MAILBOX_READ    0x00
-#define MAILBOX_STATUS  0x18
-#define MAILBOX_WRITE   0x20
+#define MAILBOX_READ    (MAILBOX_BASE + 0x00)
+#define MAILBOX_STATUS  (MAILBOX_BASE + 0x18)
+#define MAILBOX_WRITE   (MAILBOX_BASE + 0x20)
 
 #define MAILBOX_FULL (1 << 31)
 #define MAILBOX_EMPTY (1 << 30)
@@ -19,7 +19,6 @@
 // The lower 4 bits of data are discarded
 #define	MBOX_MSG(chan, data)    (((data) & ~0xf) | ((chan) & 0xf))
 #define	MBOX_CHAN(msg)          ((msg) & 0xf)
-#define	MBOX_DATA(msg)          ((msg) & ~0xf)
 
 struct __attribute__((packed, aligned(16))) fb_info {
     unsigned int physicalWidth;   // #0 Physical Width

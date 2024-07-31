@@ -1,6 +1,6 @@
 #include <nucleus.h>
 
-struct fb_info FrameBufferInfo = {
+static volatile struct fb_info FrameBufferInfo = {
     .physicalWidth = 800,
     .physicalHeight = 600,
     .virtualWidth = 800,
@@ -11,11 +11,11 @@ struct fb_info FrameBufferInfo = {
     .size = 0  
 };
 
-int ErrCode = 0;
+static int ErrCode = 0;
 
 void mailbox_write(unsigned int message, unsigned int channel) {
-    unsigned int* status = (unsigned int*)(MAILBOX_BASE + MAILBOX_STATUS);
-    unsigned int* write = (unsigned int*)(MAILBOX_BASE + MAILBOX_WRITE);
+    volatile unsigned int* status = (unsigned int*)MAILBOX_STATUS;
+    volatile unsigned int* write = (unsigned int*)MAILBOX_WRITE;
     
     // Wait until status field has 0 in the top bit
     while((*status & MAILBOX_FULL) != 0) {
@@ -29,8 +29,8 @@ void mailbox_write(unsigned int message, unsigned int channel) {
 }
 
 unsigned int mailbox_read(unsigned int channel) {
-    unsigned int* status = (unsigned int*)(MAILBOX_BASE + MAILBOX_STATUS);
-    unsigned int* read = (unsigned int*)(MAILBOX_BASE + MAILBOX_READ);
+    volatile unsigned int* status = (unsigned int*)MAILBOX_STATUS;
+    volatile unsigned int* read = (unsigned int*)MAILBOX_READ;
     unsigned int data;
     
     do {
@@ -45,7 +45,7 @@ unsigned int mailbox_read(unsigned int channel) {
     } while(MBOX_CHAN(data) != channel); // Check if the message is for the correct 
                                          // channel, if not try again
     
-    return MBOX_DATA(data) >> 4; // The top 28 bit remain as message
+    return data >> 4; // The top 28 bit remain as message
 }
 
 /*
@@ -61,9 +61,14 @@ int screen_init(void) {
 }
 
 void screen_clear(void) {
-    unsigned char* buf = FrameBufferInfo.address;
+    volatile unsigned char* buf = FrameBufferInfo.address;
     if (buf == NULL) {
         ErrCode = 2;
+        return;
+    }
+    
+    if (FrameBufferInfo.size == 0) {
+        ErrCode = 3;
         return;
     }
     
@@ -71,7 +76,7 @@ void screen_clear(void) {
         for (int x = 0; x < FrameBufferInfo.physicalWidth; x++) {
             int offset = (y * FrameBufferInfo.physicalWidth + x) * 3;
             buf[offset] = 0xFF;     // R
-            buf[offset + 1] = 0xFF; // G
+            buf[offset + 1] = 0x33; // G
             buf[offset + 2] = 0xFF; // B
         }
     }
