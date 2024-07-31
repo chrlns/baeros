@@ -18,3 +18,4 @@ BærOS
   * https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/os/index.html
   * https://www.glennklockwood.com/embedded/bmc2835-gpio.html
   * https://elinux.org/BCM2835_datasheet_errata
+  * https://github.com/raspberrypi/firmware/wiki/Mailboxes

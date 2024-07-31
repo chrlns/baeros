@@ -5,39 +5,47 @@ struct fb_info FrameBufferInfo = {
     .physicalHeight = 600,
     .virtualWidth = 800,
     .virtualHeight = 600,
+    .pitch = 0,
     .bitDepth = 24,
-    .address = 0  
+    .address = NULL,
+    .size = 0  
 };
 
 int ErrCode = 0;
 
 void mailbox_write(unsigned int message, unsigned int channel) {
-    unsigned int* status = (unsigned int*)MAILBOX_STATUS;
-    unsigned int* write = (unsigned int*)MAILBOX_WRITE;
+    unsigned int* status = (unsigned int*)(MAILBOX_BASE + MAILBOX_STATUS);
+    unsigned int* write = (unsigned int*)(MAILBOX_BASE + MAILBOX_WRITE);
     
     // Wait until status field has 0 in the top bit
-    while((*status & 0x80000000) != 0);
+    while((*status & MAILBOX_FULL) != 0) {
+        cpu_data_memory_barrier();
+    }
+    
+    cpu_data_memory_barrier();
     
     // Write channel (into lower 4bit) and message (into upper 28bit)
     *write = MBOX_MSG(channel, message);
 }
 
 unsigned int mailbox_read(unsigned int channel) {
-    unsigned int* status = (unsigned int*)MAILBOX_STATUS;
-    unsigned int* read = (unsigned int*)MAILBOX_READ;
+    unsigned int* status = (unsigned int*)(MAILBOX_BASE + MAILBOX_STATUS);
+    unsigned int* read = (unsigned int*)(MAILBOX_BASE + MAILBOX_READ);
     unsigned int data;
     
     do {
         // Wait until status field has 0 in the 30th bit
-        while((*status & 0x40000000) != 0);
+        while((*status & MAILBOX_EMPTY) != 0) {
+            cpu_data_memory_barrier();
+        }
     
         // Read the message + mailbox
         data = *read;
-        
+        cpu_data_memory_barrier();
     } while(MBOX_CHAN(data) != channel); // Check if the message is for the correct 
                                          // channel, if not try again
     
-    return MBOX_DATA(data); // The top 28 bit remain as message
+    return MBOX_DATA(data) >> 4; // The top 28 bit remain as message
 }
 
 /*
@@ -47,7 +55,7 @@ unsigned int mailbox_read(unsigned int channel) {
 int screen_init(void) {
     
     // Write the FrameBufferInfo address to mailbox 1
-    mailbox_write((unsigned int)&FrameBufferInfo  + MEM_NONCACHE_OFFSET, MBOX_CHANNEL_FRAMEBUFFER);
+    mailbox_write((unsigned int)&FrameBufferInfo + MEM_NONCACHE_OFFSET, MBOX_CHANNEL_FRAMEBUFFER);
     
     return mailbox_read(MBOX_CHANNEL_FRAMEBUFFER);
 }
@@ -55,7 +63,7 @@ int screen_init(void) {
 void screen_clear(void) {
     unsigned char* buf = FrameBufferInfo.address;
     if (buf == NULL) {
-        ErrCode = -2;
+        ErrCode = 2;
         return;
     }
     
@@ -78,7 +86,7 @@ void kmain(void) {
 
     if (screen_init() != 0) {
         // Could not init framebuffer
-        ErrCode = -1;
+        ErrCode = 1;
     } else {
         screen_clear();
     }
@@ -86,8 +94,6 @@ void kmain(void) {
     if (ErrCode != 0) {
         return;
     }
-    
-    
 
     for (;;);
 }
