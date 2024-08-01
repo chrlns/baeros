@@ -19,3 +19,5 @@ BærOS
   * https://www.glennklockwood.com/embedded/bmc2835-gpio.html
   * https://elinux.org/BCM2835_datasheet_errata
   * https://github.com/raspberrypi/firmware/wiki/Mailboxes
+  * https://wiki.osdev.org/Raspberry_Pi_Bare_Bones
+  * https://elinux.org/RPi_Framebuffer

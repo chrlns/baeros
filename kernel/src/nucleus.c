@@ -63,6 +63,7 @@ int screen_init(void) {
 }
 
 void screen_clear(void) {
+    cpu_data_memory_barrier();
     volatile unsigned char* buf = FrameBufferInfo.address;
     if (buf == NULL) {
         ErrCode = 2;
@@ -102,5 +103,6 @@ void kmain(void) {
         return;
     }
 
-    for (;;);
+    for (;;) {
+    }
 }
