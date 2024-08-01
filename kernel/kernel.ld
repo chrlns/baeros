@@ -13,10 +13,12 @@ SECTIONS
 	.data :
 	{
 		*(.data)
+		*(.data.*)
 	}
+	
+    .bss :
+    {
+        *(.bss)
+    }
 
-	/misc/ : 
-	{
-		*(*)
-	}
 }

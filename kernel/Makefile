@@ -43,7 +43,7 @@ rebuild: all
 
 # Rule to make the listing file.
 $(LIST) : $(BUILD)output.elf
-	$(ARMGNU)-objdump -d $(BUILD)output.elf > $(LIST)
+	$(ARMGNU)-objdump -D $(BUILD)output.elf > $(LIST)
 
 # Rule to make the image file.
 $(TARGET) : $(BUILD)output.elf

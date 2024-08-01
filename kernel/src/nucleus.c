@@ -1,5 +1,6 @@
 #include <nucleus.h>
 
+__attribute__((section(".data")))
 static volatile struct fb_info FrameBufferInfo = {
     .physicalWidth = 800,
     .physicalHeight = 600,
@@ -11,7 +12,8 @@ static volatile struct fb_info FrameBufferInfo = {
     .size = 0  
 };
 
-static int ErrCode = 0;
+__attribute__((section(".data")))
+static volatile int ErrCode = 0;
 
 void mailbox_write(unsigned int message, unsigned int channel) {
     volatile unsigned int* status = (unsigned int*)MAILBOX_STATUS;
