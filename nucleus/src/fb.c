@@ -30,6 +30,8 @@ static volatile struct fb_info FrameBufferInfo = {
     .size = 0  
 };
 
+static unsigned char rnd = 17;
+
 /*
  *  Initializes the screen. That means that we setup the mailbox system between
  *  the video processor and the CPU.
@@ -66,4 +68,21 @@ void screen_clear(void) {
         }
     }
     cpu_data_memory_barrier();
+}
+
+void screen_random(void) {
+    cpu_data_memory_barrier();
+    volatile unsigned char* buf = FrameBufferInfo.address;
+    
+
+    for (int y = 0; y < FrameBufferInfo.physicalHeight; y++) {
+        for (int x = 0; x < FrameBufferInfo.physicalWidth; x++) {
+            int offset = (y * FrameBufferInfo.physicalWidth + x) * 3;
+            buf[offset] = 0x0F + rnd;     // R
+            buf[offset + 1] = 0x22 ^ rnd; // G
+            buf[offset + 2] = 0xAA - rnd; // B
+        }
+    }
+    rnd++;
+    cpu_data_memory_barrier();    
 }

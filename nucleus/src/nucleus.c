@@ -22,6 +22,9 @@ void nmain(void) {
     }
 
     for (;;) {
-        ErrCode = 8;
+        screen_random();
+        /*for (volatile unsigned int i = 0; i < (1 << 31); i++) {
+
+        }*/
     }
 }
