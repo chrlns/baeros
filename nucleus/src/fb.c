@@ -1,3 +1,4 @@
+#include "chars_pixels.h"
 #include "mbox.h"
 #include "nucleus.h"
 
@@ -85,4 +86,28 @@ void screen_random(void) {
     }
     rnd++;
     cpu_data_memory_barrier();    
+}
+
+#define CHAR_PIXEL_WIDTH 8
+#define CHAR_PIXEL_HEIGHT 16
+
+void screen_draw_char(char c, int x, int y) {
+    int fb_offset = (y * FrameBufferInfo.physicalHeight + x) * 3;
+    int ch_offset = c * CHAR_PIXEL_HEIGHT * CHAR_PIXEL_WIDTH;
+
+    for (int h = 0; h < CHAR_PIXEL_HEIGHT; h++) {
+        fb_offset += FrameBufferInfo.physicalWidth * 3;
+        for (int w = 0; w < CHAR_PIXEL_WIDTH; w++) {
+            int offset = (h * CHAR_PIXEL_HEIGHT + w);
+
+            char pixel = chars_pixels[ch_offset + offset];
+            if (pixel == 0xFF) {
+                continue;
+            }
+
+            FrameBufferInfo.address[fb_offset + w * 3 + 0] = 0xFF;
+            FrameBufferInfo.address[fb_offset + w * 3 + 1] = 0xFF;
+            FrameBufferInfo.address[fb_offset + w * 3 + 2] = 0xFF;
+        }
+    }
 }
