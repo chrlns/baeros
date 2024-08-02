@@ -9,7 +9,7 @@
 # arm-bcm2708-linux-gnueabi.
 ARMGNU ?= arm-none-eabi
 
-CCFLAGS=-O1 -Wall 
+CCFLAGS=-O0 -Wall -ffreestanding -nostdlib -fno-builtin
 
 # The intermediate directory for compiled object files.
 BUILD = build/

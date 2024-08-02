@@ -1,13 +1,16 @@
 #include <nucleus.h>
 
-__attribute__((section(".data")))
+
+__attribute__((aligned(16), section(".data")))
 static volatile struct fb_info FrameBufferInfo = {
-    .physicalWidth = 800,
-    .physicalHeight = 600,
-    .virtualWidth = 800,
-    .virtualHeight = 600,
+    .physicalWidth = 640,
+    .physicalHeight = 480,
+    .virtualWidth = 640,
+    .virtualHeight = 480,
     .pitch = 0,
     .bitDepth = 24,
+    .x = 0,
+    .y = 0,
     .address = NULL,
     .size = 0  
 };
@@ -65,27 +68,31 @@ int screen_init(void) {
 void screen_clear(void) {
     cpu_data_memory_barrier();
     volatile unsigned char* buf = FrameBufferInfo.address;
+    
     if (buf == NULL) {
         ErrCode = 2;
         return;
     }
     
-    if (FrameBufferInfo.size == 0) {
+    /*if (FrameBufferInfo.size == 0) {
         ErrCode = 3;
         return;
-    }
+    }*/
+    
     
     for (int y = 0; y < FrameBufferInfo.physicalHeight; y++) {
         for (int x = 0; x < FrameBufferInfo.physicalWidth; x++) {
             int offset = (y * FrameBufferInfo.physicalWidth + x) * 3;
-            buf[offset] = 0xFF;     // R
-            buf[offset + 1] = 0x33; // G
-            buf[offset + 2] = 0xFF; // B
+            buf[offset] = 0x0F;     // R
+            buf[offset + 1] = 0x22; // G
+            buf[offset + 2] = 0xAA; // B
         }
     }
+    cpu_data_memory_barrier();
 }
 
 void kmain(void) {
+
 
     // Virtual addresses in kernel mode will range between 0xC0000000 and 0xEFFFFFFF
     
@@ -104,5 +111,6 @@ void kmain(void) {
     }
 
     for (;;) {
+        ErrCode = 8;
     }
 }
