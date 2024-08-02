@@ -9,8 +9,8 @@ _start:     # define entrypoint to avoid warning
 # Initialize stack
 ldr sp, =stack_top
 
-# Call kernel main
-b kmain
+# Call nucleus (kernel) main
+b nmain
 
 stack_top:
     .space 1024
