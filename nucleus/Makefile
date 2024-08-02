@@ -20,16 +20,16 @@ SOURCE = src/
 INCLUDE = src/
 
 # The name of the output file to generate.
-TARGET = kernel.img
+TARGET = baeros.img
 
 # The name of the assembler listing file to generate.
-LIST = kernel.list
+LIST = nucleus.list
 
 # The name of the map file to generate.
-MAP = kernel.map
+MAP = nucleus.map
 
 # The name of the linker script to use.
-LINKER = kernel.ld
+LINKER = nucleus.ld
 
 # The names of all object files that must be generated. Deduced from the 
 # assembly code files in source.
