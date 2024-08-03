@@ -1,6 +1,7 @@
 #include "chars_pixels.h"
 #include "mbox.h"
 #include "nucleus.h"
+#include "fb.h"
 
 extern volatile int ErrCode;
 
@@ -50,7 +51,6 @@ void screen_clear(void) {
     volatile unsigned char* buf = FrameBufferInfo.address;
     
     if (buf == NULL) {
-        ErrCode = 2;
         return;
     }
     
@@ -88,8 +88,7 @@ void screen_random(void) {
     cpu_data_memory_barrier();    
 }
 
-#define CHAR_PIXEL_WIDTH 8
-#define CHAR_PIXEL_HEIGHT 16
+
 
 /*
  * Draws the given ASCII-similar character on the framebuffer at the given
@@ -126,7 +125,7 @@ void screen_draw_char(char c, int x, int y) {
 }
 
 void screen_draw_str(char* str, int x, int y) {
-    if (str == NULL) {
+    if (str == NULL || FrameBufferInfo.address == NULL) {
         return;
     }
 
