@@ -5,7 +5,7 @@ __attribute__((section(".data")))
 volatile int ErrCode = 0;
 
 void print(const char* msg) {
-    screen_draw_char(msg[0], 0, 0);
+    screen_draw_str((char*)msg, 0, 0);
 }
 
 void nmain(void) {

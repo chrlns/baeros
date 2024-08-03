@@ -91,23 +91,54 @@ void screen_random(void) {
 #define CHAR_PIXEL_WIDTH 8
 #define CHAR_PIXEL_HEIGHT 16
 
+/*
+ * Draws the given ASCII-similar character on the framebuffer at the given
+ * pixel position.
+ */
 void screen_draw_char(char c, int x, int y) {
-    int fb_offset = (y * FrameBufferInfo.physicalHeight + x) * 3;
+    if (c == 0 || c == '\n')
+        return;
+
+    // The right place on the screen
+    int fb_offset_base = (y * FrameBufferInfo.physicalWidth + x) * 3;
+
+    // The offset within the char bitmap pixel array
     int ch_offset = c * CHAR_PIXEL_HEIGHT * CHAR_PIXEL_WIDTH;
 
     for (int h = 0; h < CHAR_PIXEL_HEIGHT; h++) {
-        fb_offset += FrameBufferInfo.physicalWidth * 3;
-        for (int w = 0; w < CHAR_PIXEL_WIDTH; w++) {
-            int offset = (h * CHAR_PIXEL_HEIGHT + w);
+        // Scroll to next line
+        int fb_offset = fb_offset_base + h * FrameBufferInfo.physicalWidth * 3;
 
-            char pixel = chars_pixels[ch_offset + offset];
-            if (pixel == 0xFF) {
-                continue;
+        for (int w = 0; w < CHAR_PIXEL_WIDTH; w++) {
+            int offset = (h * CHAR_PIXEL_WIDTH + w);
+
+            char pixel = 0xFF - chars_pixels[ch_offset + offset];
+            if (pixel <= 0x80) {
+                continue; // if transparent
             }
 
-            FrameBufferInfo.address[fb_offset + w * 3 + 0] = 0xFF;
-            FrameBufferInfo.address[fb_offset + w * 3 + 1] = 0xFF;
-            FrameBufferInfo.address[fb_offset + w * 3 + 2] = 0xFF;
+            // Set all three color channels to white
+            FrameBufferInfo.address[fb_offset + w * 3 + 0] = pixel;
+            FrameBufferInfo.address[fb_offset + w * 3 + 1] = pixel;
+            FrameBufferInfo.address[fb_offset + w * 3 + 2] = pixel;
+        }
+    }
+}
+
+void screen_draw_str(char* str, int x, int y) {
+    if (str == NULL) {
+        return;
+    }
+
+    int ox = x, oy = y;
+    while (*str != 0) {
+        screen_draw_char(*str, ox, oy);
+        str++;
+
+        ox += CHAR_PIXEL_WIDTH;
+        if (ox >= FrameBufferInfo.physicalWidth || *str == '\n') {
+            ox = 0;
+            oy += CHAR_PIXEL_HEIGHT;
         }
     }
 }
