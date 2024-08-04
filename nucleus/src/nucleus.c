@@ -17,16 +17,13 @@ bool fb_initialized = false;
 void update_screen(void) {
     screen_clear();
 
-    int row_offset = 0;
     for (int i = 0; i < CONSOLE_ROWS; i++) {
         int idx = (log_idx - (CONSOLE_ROWS - i)); 
         if (idx < 0) {
             idx += KERNEL_LOG_SIZE; // wrap around
         }
         char* msg = kernel_log[idx];
-        row_offset += screen_draw_str(msg, 
-            CHAR_PIXEL_WIDTH, // Leave a little padding on the left
-            row_offset + i * CHAR_PIXEL_HEIGHT);
+        screen_draw_str(msg);
     }
 }
 

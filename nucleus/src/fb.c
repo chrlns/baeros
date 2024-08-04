@@ -33,6 +33,8 @@ static volatile struct fb_info FrameBufferInfo = {
 };
 
 static unsigned char rnd = 17;
+static int cursor_x = 0;
+static int cursor_y = 0;
 
 /*
  *  Initializes the screen. That means that we setup the mailbox system between
@@ -44,6 +46,11 @@ int screen_init(void) {
     mailbox_write((unsigned int)&FrameBufferInfo + MEM_NONCACHE_OFFSET, MBOX_CHANNEL_FRAMEBUFFER);
     
     return mailbox_read(MBOX_CHANNEL_FRAMEBUFFER);
+}
+
+void screen_cursor_reset() {
+    cursor_x = 0;
+    cursor_y = 0;
 }
 
 void screen_clear(void) {
@@ -68,6 +75,9 @@ void screen_clear(void) {
             buf[offset + 2] = 0xAA; // B
         }
     }
+
+    screen_cursor_reset();
+
     cpu_data_memory_barrier();
 }
 
@@ -126,25 +136,41 @@ void screen_draw_char(char c, int x, int y) {
 
 /*
  * Draws the given string character by character onto the framebuffer.
- * Returns a number > 0 if one or more line breaks have occurred.
+ * The position is determined by current cursor position.
+ * Returns true if an row overflow occurred, meaning the cursor is at the 
+ * bottom.
  */
-int screen_draw_str(char* str, int x, int y) {
+bool screen_draw_str(char* str) {
     if (str == NULL || FrameBufferInfo.address == NULL) {
-        return 0;
+        return false;
     }
 
-    int linebreaks = 0;
-    int ox = x, oy = y;
+    // Determine screen positions from cursor position and add one character 
+    // padding if cursor position is left or top.
+    int ox = 0, oy = 0;
+    if (cursor_x == 0) {
+        ox = CHAR_PIXEL_WIDTH;
+    }
+    if (cursor_y == 0) {
+        oy = CHAR_PIXEL_HEIGHT;
+    }
+    ox += cursor_x * CHAR_PIXEL_WIDTH;
+    oy += cursor_y * CHAR_PIXEL_HEIGHT;
+
     while (*str != 0) {
         screen_draw_char(*str, ox, oy);
-        str++;
+        cursor_x++;
 
         ox += CHAR_PIXEL_WIDTH;
-        if (ox >= FrameBufferInfo.physicalWidth - 2 * CHAR_PIXEL_WIDTH || *str == '\n') {
+        if ((ox >= FrameBufferInfo.physicalWidth - 2 * CHAR_PIXEL_WIDTH) || (*str == '\n')) {
             ox = CHAR_PIXEL_WIDTH;
             oy += CHAR_PIXEL_HEIGHT;
-            linebreaks++;
+            cursor_x = 0;
+            cursor_y = min(cursor_y + 1, (FRAMEBUFFER_HEIGHT / CHAR_PIXEL_HEIGHT) - 2);
         }
+
+        str++; // go to next character
     }
-    return linebreaks;
+
+    return cursor_y == (FRAMEBUFFER_HEIGHT / CHAR_PIXEL_HEIGHT) - 2;
 }
