@@ -1,3 +1,4 @@
+// Take from some tutorial, author unknown
 const char *chars_pixels = 
 	/* 0x00 ( ) */
 	"\xff\xff\xff\xff\xff\xff\xff\xff"

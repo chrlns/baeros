@@ -124,20 +124,27 @@ void screen_draw_char(char c, int x, int y) {
     }
 }
 
-void screen_draw_str(char* str, int x, int y) {
+/*
+ * Draws the given string character by character onto the framebuffer.
+ * Returns a number > 0 if one or more line breaks have occurred.
+ */
+int screen_draw_str(char* str, int x, int y) {
     if (str == NULL || FrameBufferInfo.address == NULL) {
-        return;
+        return 0;
     }
 
+    int linebreaks = 0;
     int ox = x, oy = y;
     while (*str != 0) {
         screen_draw_char(*str, ox, oy);
         str++;
 
         ox += CHAR_PIXEL_WIDTH;
-        if (ox >= FrameBufferInfo.physicalWidth || *str == '\n') {
-            ox = 0;
+        if (ox >= FrameBufferInfo.physicalWidth - 2 * CHAR_PIXEL_WIDTH || *str == '\n') {
+            ox = CHAR_PIXEL_WIDTH;
             oy += CHAR_PIXEL_HEIGHT;
+            linebreaks++;
         }
     }
+    return linebreaks;
 }
