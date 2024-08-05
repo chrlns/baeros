@@ -37,14 +37,15 @@ static int cursor_x = 0;
 static int cursor_y = 0;
 
 /*
- *  Initializes the screen. That means that we setup the mailbox system between
- *  the video processor and the CPU.
+ *  Initializes the framebuffer. That means that we setup the mailbox system
+ *  between the video processor and the CPU.
  */
-int screen_init(void) {
+int fb_init(void) {
     
     // Write the FrameBufferInfo address to mailbox 1
     mailbox_write((unsigned int)&FrameBufferInfo + MEM_NONCACHE_OFFSET, MBOX_CHANNEL_FRAMEBUFFER);
     
+    // Read the answer (status code)
     return mailbox_read(MBOX_CHANNEL_FRAMEBUFFER);
 }
 

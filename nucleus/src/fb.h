@@ -8,7 +8,7 @@
 
 #define min(a,b) ((a > b) ? (b) : (a))
 
-int screen_init(void);
+int fb_init(void);
 void screen_clear(void);
 void screen_random(void);
 

@@ -2,6 +2,7 @@
 
 #include "fb.h"
 #include "nucleus.h"
+#include "mem.h"
 
 __attribute__((section(".data")))
 volatile int ErrCode = 0;
@@ -44,22 +45,36 @@ void nuc_main(void) {
     print("\n");
     print("Created by Christian Lins. Source is MIT licensed.\n");
 
-    // Virtual addresses in kernel mode will range between 0xC0000000 and 0xEFFFFFFF
-    
-    // Virtual addresses in user mode (i.e. seen by processes running) will range
-    // between 0x00000000 and 0xBFFFFFFF
-    print("Initializing framebuffer...");
-    if (screen_init() != 0) {
-        // Could not init framebuffer
-        ErrCode = 1;
-    } else {
-        fb_initialized = true;
-        screen_clear();
+    // Sometimes the first framebuffer initialization fails, so we'll try
+    // several times before giving up. Perhaps a timing issue?
+    for (int i = 1; i <= 3; i++) {
+        print("Initializing framebuffer...");
+        if (fb_init() != 0) {
+            // Could not init framebuffer
+            ErrCode = 1;
+            print("Failed!\n");
+        } else {
+            fb_initialized = true;
+            screen_clear();
+            print("OK\n");
+            break;
+        }
     }
-    print("OK\n");
 
     if (ErrCode != 0) {
         return;
+    }
+    
+    print("Initializing small heap...");
+    mem_init();
+    print("OK\n");
+
+    void* buf = nuc_malloc(24, 0);
+    if (buf == NULL) {
+        print("nuc_malloc failed\n");
+    } else {
+        nuc_free(buf);
+        print("buffer freed\n");
     }
 
     print("Entering endless loop. No init task.");
