@@ -48,24 +48,19 @@ int screen_init(void) {
     return mailbox_read(MBOX_CHANNEL_FRAMEBUFFER);
 }
 
-void screen_cursor_reset() {
+static void cursor_reset() {
     cursor_x = 0;
     cursor_y = 0;
 }
 
 void screen_clear(void) {
     cpu_data_memory_barrier();
-    volatile unsigned char* buf = FrameBufferInfo.address;
-    
-    if (buf == NULL) {
+
+    if (FrameBufferInfo.address == NULL) {
         return;
     }
     
-    /*if (FrameBufferInfo.size == 0) {
-        ErrCode = 3;
-        return;
-    }*/
-    
+    volatile unsigned char* buf = FrameBufferInfo.address;
     
     for (int y = 0; y < FrameBufferInfo.physicalHeight; y++) {
         for (int x = 0; x < FrameBufferInfo.physicalWidth; x++) {
@@ -76,7 +71,7 @@ void screen_clear(void) {
         }
     }
 
-    screen_cursor_reset();
+    cursor_reset();
 
     cpu_data_memory_barrier();
 }
@@ -134,6 +129,11 @@ void screen_draw_char(char c, int x, int y) {
     }
 }
 
+static void cursor_newline() {
+    cursor_x = 0;
+    cursor_y = min(cursor_y + 1, (FRAMEBUFFER_HEIGHT / CHAR_PIXEL_HEIGHT) - 2);
+}
+
 /*
  * Draws the given string character by character onto the framebuffer.
  * The position is determined by current cursor position.
@@ -158,15 +158,20 @@ bool screen_draw_str(char* str) {
     oy += cursor_y * CHAR_PIXEL_HEIGHT;
 
     while (*str != 0) {
-        screen_draw_char(*str, ox, oy);
-        cursor_x++;
-
-        ox += CHAR_PIXEL_WIDTH;
-        if ((ox >= FrameBufferInfo.physicalWidth - 2 * CHAR_PIXEL_WIDTH) || (*str == '\n')) {
+        if (*str == '\n') {
+            cursor_newline();
             ox = CHAR_PIXEL_WIDTH;
             oy += CHAR_PIXEL_HEIGHT;
-            cursor_x = 0;
-            cursor_y = min(cursor_y + 1, (FRAMEBUFFER_HEIGHT / CHAR_PIXEL_HEIGHT) - 2);
+        } else {
+            screen_draw_char(*str, ox, oy);
+            cursor_x++;
+
+            ox += CHAR_PIXEL_WIDTH;
+            if (ox >= FrameBufferInfo.physicalWidth - 2 * CHAR_PIXEL_WIDTH) {
+                cursor_newline();
+                ox = CHAR_PIXEL_WIDTH;
+                oy += CHAR_PIXEL_HEIGHT;
+            }
         }
 
         str++; // go to next character

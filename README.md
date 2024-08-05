@@ -18,7 +18,7 @@ to work).
 ## Debug Kernel
 
 Note: currently, kernel debugging is not possible as BaerOS is not compatible
-with QEMU yet.
+with QEMU yet (raspi support in QEMU seems incomplete).
 
   * Start QEMU with -s -S flags (qemu.sh)
   * Start gdb with arm-none-eabi-gdb

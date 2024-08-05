@@ -6,7 +6,7 @@
 __attribute__((section(".data")))
 volatile int ErrCode = 0;
 
-char* kernel_log[KERNEL_LOG_SIZE] = { "BaerOS" };
+char* kernel_log[KERNEL_LOG_SIZE] = { NULL };
 int log_idx = 0;
 
 bool fb_initialized = false;
@@ -35,7 +35,10 @@ void print(const char* msg) {
     }
 }
 
-void nmain(void) {
+/*
+ * Main entry point of the kernel.
+ */
+void nuc_main(void) {
     print("BaerOS\n\n");
     print(__DATE__);
     print("\n");
@@ -62,9 +65,6 @@ void nmain(void) {
     print("Entering endless loop. No init task.");
 
     for (;;) {
-        //screen_random();
-        /*for (volatile unsigned int i = 0; i < (1 << 31); i++) {
 
-        }*/
     }
 }

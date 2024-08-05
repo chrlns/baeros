@@ -12,4 +12,6 @@ extern void cpu_data_memory_barrier(void);
 
 #define CONSOLE_ROWS 16 
 
+void print(const char*);
+
 #endif
