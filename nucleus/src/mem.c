@@ -3,11 +3,11 @@
 
 #define SMALL_HEAP_SIZE 4096
 #define SMALL_HEAP_MAXFRAGMENTS 64
-extern void* small_heap;
+volatile extern void* small_heap;
 
 struct mem_sheap_fragment small_heap_fragments[SMALL_HEAP_MAXFRAGMENTS];
 
-void zeroes(void* address, size_t len) {
+void zeroes(volatile void* address, size_t len) {
     while(len-- > 0) {
         *((char*)address) = 0;
         address++;
@@ -35,8 +35,15 @@ void* nuc_malloc(size_t size, int flags) {
         struct mem_sheap_fragment* frag = &small_heap_fragments[i];
 
         if (!frag->used) {
-            void* alloc_start = (i == 0) ? small_heap : 
-                (void*)align_to_4_bytes((size_t)(small_heap_fragments[i-1].address + small_heap_fragments[i-1].len));
+            void* alloc_start;
+            if(i == 0) {
+                alloc_start = (void*)small_heap;
+            } else { 
+                alloc_start = 
+                    (void*)align_to_4_bytes(
+                        (size_t)(small_heap_fragments[i-1].address + 
+                                 small_heap_fragments[i-1].len));
+            }
 
             if (alloc_start + aligned_size <= heap_end) {
                 frag->used = true;
