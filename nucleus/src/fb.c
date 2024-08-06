@@ -33,8 +33,8 @@ static volatile struct fb_info FrameBufferInfo = {
 };
 
 static unsigned char rnd = 17;
-static int cursor_x = 0;
-static int cursor_y = 0;
+static int cursor_x = 1;
+static int cursor_y = 1;
 
 /*
  *  Initializes the framebuffer. That means that we setup the mailbox system
@@ -50,8 +50,8 @@ int fb_init(void) {
 }
 
 static void cursor_reset() {
-    cursor_x = 0;
-    cursor_y = 0;
+    cursor_x = 1;
+    cursor_y = 1;
 }
 
 void screen_clear(void) {
@@ -66,9 +66,9 @@ void screen_clear(void) {
     for (int y = 0; y < FrameBufferInfo.physicalHeight; y++) {
         for (int x = 0; x < FrameBufferInfo.physicalWidth; x++) {
             int offset = (y * FrameBufferInfo.physicalWidth + x) * 3;
-            buf[offset] = 0x0F;     // R
-            buf[offset + 1] = 0x22; // G
-            buf[offset + 2] = 0xAA; // B
+            buf[offset] = COLOR_BLÅBÆR_R;     // R
+            buf[offset + 1] = COLOR_BLÅBÆR_G; // G
+            buf[offset + 2] = COLOR_BLÅBÆR_B; // B
         }
     }
 
@@ -126,12 +126,13 @@ void screen_draw_char(char c, int x, int y) {
             FrameBufferInfo.address[fb_offset + w * 3 + 0] = pixel;
             FrameBufferInfo.address[fb_offset + w * 3 + 1] = pixel;
             FrameBufferInfo.address[fb_offset + w * 3 + 2] = pixel;
+            //cpu_data_memory_barrier(); 
         }
     }
 }
 
 static void cursor_newline() {
-    cursor_x = 0;
+    cursor_x = 1;
     cursor_y = min(cursor_y + 1, (FRAMEBUFFER_HEIGHT / CHAR_PIXEL_HEIGHT) - 2);
 }
 
@@ -141,25 +142,20 @@ static void cursor_newline() {
  * Returns true if an row overflow occurred, meaning the cursor is at the 
  * bottom.
  */
-bool screen_draw_str(char* str) {
+bool screen_draw_str(const char* str) {
+    //cpu_data_memory_barrier(); // Barrier to make sure we can read FrameBufferInfo.address?
     if (str == NULL || FrameBufferInfo.address == NULL) {
         return false;
     }
 
     // Determine screen positions from cursor position and add one character 
     // padding if cursor position is left or top.
-    int ox = 0, oy = 0;
-    if (cursor_x == 0) {
-        ox = CHAR_PIXEL_WIDTH;
-    }
-    if (cursor_y == 0) {
-        oy = CHAR_PIXEL_HEIGHT;
-    }
-    ox += cursor_x * CHAR_PIXEL_WIDTH;
-    oy += cursor_y * CHAR_PIXEL_HEIGHT;
+    int ox = cursor_x * CHAR_PIXEL_WIDTH;
+    int oy = cursor_y * CHAR_PIXEL_HEIGHT;
 
-    while (*str != 0) {
+    while (*str != '\0') {
         if (*str == '\n') {
+            // If we find a newline char we skip drawing and move to next line
             cursor_newline();
             ox = CHAR_PIXEL_WIDTH;
             oy += CHAR_PIXEL_HEIGHT;
