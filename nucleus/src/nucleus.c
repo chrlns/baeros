@@ -37,16 +37,16 @@ void update_screen(void) {
 
 void print(const char* msg) {
     // Copy message
-    size_t len = strlen(msg) + 1;
+   /* size_t len = strlen(msg) + 1;
     char* msg_cpy = nuc_malloc(len, 0);
     strncpy(msg_cpy, msg, len);
 
     // Free old message if existing
     if (kernel_log[log_idx] != NULL) {
         nuc_free(kernel_log[log_idx]);
-    }
+    }*/
 
-    kernel_log[log_idx] = msg_cpy;
+    kernel_log[log_idx] = msg;
     log_idx = (log_idx + 1) % KERNEL_LOG_SIZE;
 
     if (fb_initialized) {
@@ -61,23 +61,22 @@ void nuc_main(void) {
     log_init();
     mem_init();
 
-    /*print("BaerOS\n\n");
+    print("BaerOS\nBuild ");
     print(__DATE__);
-    print("\n");
-    print("Created by Christian Lins. Source is MIT licensed.\n");*/
+    print("\n\n");
 
     // Sometimes the first framebuffer initialization fails, so we'll try
     // several times before giving up. Perhaps a timing issue?
     for (int i = 1; i <= 3; i++) {
-        //print("Initializing framebuffer...");
+        print("Initializing framebuffer...");
         if (fb_init() != 0) {
             // Could not init framebuffer
             ErrCode = 1;
-            //print("Failed!\n");
+            print("Failed!\n");
         } else {
             fb_initialized = true;
             screen_clear();
-            //print("OK\n");
+            print("OK\n");
             break;
         }
     }
@@ -86,12 +85,7 @@ void nuc_main(void) {
         return;
     }
 
-    screen_draw_str("Erster\n\n");
-    for (int i = 0; i < 10; i++) {
-        screen_draw_str("Hallo Welt\n\n");
-    }
-
-    //print("Entering endless loop. No init task.");
+    print("Entering endless loop. No init task.\n");
 
     for (;;) {
 
