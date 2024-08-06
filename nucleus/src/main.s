@@ -21,11 +21,13 @@ b nuc_main
 
 # Some space for the stack
 .section data
+.align 4
 stack_top:
     .space 1024
 
 # Some space for a simple and very small heap
 .section data
+.align 4
 .globl small_heap
 small_heap:
     .space 4096

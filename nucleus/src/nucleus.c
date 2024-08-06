@@ -37,16 +37,16 @@ void update_screen(void) {
 
 void print(const char* msg) {
     // Copy message
-   /* size_t len = strlen(msg) + 1;
+    size_t len = strlen(msg) + 1;
     char* msg_cpy = nuc_malloc(len, 0);
     strncpy(msg_cpy, msg, len);
 
     // Free old message if existing
-    if (kernel_log[log_idx] != NULL) {
-        nuc_free(kernel_log[log_idx]);
-    }*/
+    //if (kernel_log[log_idx] != NULL) {
+    //    nuc_free(kernel_log[log_idx]);
+    //}
 
-    kernel_log[log_idx] = msg;
+    kernel_log[log_idx] = msg_cpy;
     log_idx = (log_idx + 1) % KERNEL_LOG_SIZE;
 
     if (fb_initialized) {
@@ -84,6 +84,22 @@ void nuc_main(void) {
     if (ErrCode != 0) {
         return;
     }
+
+    /*char *buf = nuc_malloc(17, 0);
+    if (buf == NULL) {
+        print("malloc failed\n");
+    } else {
+        strncpy(buf, "Hallo Welt", strlen("Hallo Welt"));
+        print(buf);
+    }
+
+    char *buf2 = nuc_malloc(32, 0);
+    if (buf2 == NULL) {
+        print("malloc failed\n");
+    } else {
+        strncpy(buf2, "Universum ist super", strlen("Universum ist super"));
+        print(buf2);
+    }*/
 
     print("Entering endless loop. No init task.\n");
 

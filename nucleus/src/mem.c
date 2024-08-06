@@ -21,7 +21,6 @@ void mem_init() {
         small_heap_fragments[i].len = 0;
         small_heap_fragments[i].used = false;
     }
-    
 }
 
 static size_t align_to_4_bytes(size_t size) {
@@ -29,26 +28,26 @@ static size_t align_to_4_bytes(size_t size) {
 }
 
 void* nuc_malloc(size_t size, int flags) {
-    void* next_start = small_heap;
+    size_t aligned_size = align_to_4_bytes(size);
+    void* heap_end = (void*)((char*)small_heap + SMALL_HEAP_SIZE);
 
     for (int i = 0; i < SMALL_HEAP_MAXFRAGMENTS; i++) {
         struct mem_sheap_fragment* frag = &small_heap_fragments[i];
 
-        if (frag->used) {
-            next_start = (void*)align_to_4_bytes((size_t)(frag->address + frag->len));
-        } else {
-            if (frag->address != NULL && frag->len >= size) {
-                // Fragment has been used before and fits the size
+        if (!frag->used) {
+            void* alloc_start = (i == 0) ? small_heap : 
+                (void*)align_to_4_bytes((size_t)(small_heap_fragments[i-1].address + small_heap_fragments[i-1].len));
+
+            if (alloc_start + aligned_size <= heap_end) {
                 frag->used = true;
-                return frag->address;
-            } else {
-                frag->used = true;
-                frag->len = align_to_4_bytes(size);
-                frag->address = next_start;
-                return next_start;
+                frag->len = aligned_size;
+                frag->address = alloc_start;
+                return alloc_start;
             }
         }
     }
+
+    // No suitable fragment found or heap is full
     return NULL;
 }
 
