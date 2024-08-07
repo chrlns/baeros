@@ -49,6 +49,10 @@ int fb_init(void) {
     return mailbox_read(MBOX_CHANNEL_FRAMEBUFFER);
 }
 
+volatile void* fb_address() {
+    return FrameBufferInfo.address;
+}
+
 static void cursor_reset() {
     cursor_x = 1;
     cursor_y = 1;

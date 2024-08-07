@@ -54,6 +54,13 @@ void print(const char* msg) {
     }
 }
 
+/* Print number as hex string. */
+void printih(uint32_t i) {
+    char buf[11] = "0xAABBCCDD"; // 0xAABBCCDD\0
+    char* str = itoa(i, buf + 2, 16);
+    print(str);
+}
+
 /*
  * Main entry point of the kernel.
  */
@@ -77,6 +84,9 @@ void nuc_main(void) {
             fb_initialized = true;
             screen_clear();
             print("OK\n");
+            print("Framebuffer Address 0x");
+            printih((uint32_t)fb_address());
+            print("\n");
             break;
         }
     }

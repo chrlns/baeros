@@ -13,6 +13,7 @@
 #define min(a,b) ((a < b) ? (a) : (b))
 
 int fb_init(void);
+volatile void* fb_address();
 void screen_clear(void);
 void screen_random(void);
 
