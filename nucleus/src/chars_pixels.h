@@ -1,4 +1,4 @@
-// Take from some tutorial, author unknown
+// Take from some tutorial at elinux.org, author unknown
 const char *chars_pixels = 
 	/* 0x00 ( ) */
 	"\xff\xff\xff\xff\xff\xff\xff\xff"

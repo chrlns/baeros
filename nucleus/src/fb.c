@@ -10,7 +10,7 @@ struct __attribute__((packed, aligned(16))) fb_info {
     unsigned int physicalHeight;  // #4 Physical Height
     unsigned int virtualWidth;    // #8 Virtual Width
     unsigned int virtualHeight;   // #12 Virtual Height
-    volatile unsigned int pitch;           // #16 GPU - Pitch
+    volatile unsigned int pitch;  // #16 GPU - Pitch, offset between rows
     unsigned int bitDepth;        // #20 Bit Depth
     unsigned int x;               // #24 X offset
     unsigned int y;               // #28 Y offset
