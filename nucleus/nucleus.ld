@@ -13,7 +13,6 @@ SECTIONS
 	.data :
 	{
 		*(.data)
-		*(.data.*)
 	}
 	
     .bss :
