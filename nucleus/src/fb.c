@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #include "chars_pixels.h"
 #include "mbox.h"
 #include "nucleus.h"
@@ -25,7 +27,7 @@ static volatile struct fb_info FrameBufferInfo = {
     .virtualWidth = 640,
     .virtualHeight = 480,
     .pitch = 0,
-    .bitDepth = 24,
+    .bitDepth = FRAMEBUFFER_DEPTH * 8,
     .x = 0,
     .y = 0,
     .address = NULL,
@@ -58,22 +60,27 @@ static void cursor_reset() {
     cursor_y = 1;
 }
 
+/* Clears the framebuffer with the background color. */
 void screen_clear(void) {
-    cpu_data_memory_barrier();
-
+    // Do nothing if framebuffer is not initialized (yet)
     if (FrameBufferInfo.address == NULL) {
         return;
     }
     
-    volatile unsigned char* buf = FrameBufferInfo.address;
-    
-    for (int y = 0; y < FrameBufferInfo.physicalHeight; y++) {
-        for (int x = 0; x < FrameBufferInfo.physicalWidth; x++) {
-            int offset = (y * FrameBufferInfo.physicalWidth + x) * 3;
-            buf[offset] = COLOR_BLÅBÆR_R;     // R
-            buf[offset + 1] = COLOR_BLÅBÆR_G; // G
-            buf[offset + 2] = COLOR_BLÅBÆR_B; // B
-        }
+    // We use the framebuffer address as int pointer
+    volatile uint32_t* buf = (uint32_t*)FrameBufferInfo.address;
+
+    // This a 4-byte-word containing one pixel color
+    const uint32_t pattern =  
+        (COLOR_BLÅBÆR_R << 0) | 
+        (COLOR_BLÅBÆR_G << 8) | 
+        (COLOR_BLÅBÆR_B << 16);
+
+    // Fill the complete framebuffer area with this pixel pattern.
+    // Should be faster than drawing single colors because we use
+    // 4-byte-aligned memory access.
+    for (int i = 0; i < FRAMEBUFFER_HEIGHT * FRAMEBUFFER_WIDTH; i++) {
+        *buf++ = pattern;
     }
 
     cursor_reset();
@@ -88,7 +95,7 @@ void screen_random(void) {
 
     for (int y = 0; y < FrameBufferInfo.physicalHeight; y++) {
         for (int x = 0; x < FrameBufferInfo.physicalWidth; x++) {
-            int offset = (y * FrameBufferInfo.physicalWidth + x) * 3;
+            int offset = (y * FrameBufferInfo.physicalWidth + x) * FRAMEBUFFER_DEPTH;
             buf[offset] = 0x0F + rnd;     // R
             buf[offset + 1] = 0x22 ^ rnd; // G
             buf[offset + 2] = 0xAA - rnd; // B
@@ -109,14 +116,14 @@ void screen_draw_char(char c, int x, int y) {
         return;
 
     // The right place on the screen
-    int fb_offset_base = (y * FrameBufferInfo.physicalWidth + x) * 3;
+    int fb_offset_base = (y * FrameBufferInfo.physicalWidth + x) * FRAMEBUFFER_DEPTH;
 
     // The offset within the char bitmap pixel array
     int ch_offset = c * CHAR_PIXEL_HEIGHT * CHAR_PIXEL_WIDTH;
 
     for (int h = 0; h < CHAR_PIXEL_HEIGHT; h++) {
         // Scroll to next line
-        int fb_offset = fb_offset_base + h * FrameBufferInfo.physicalWidth * 3;
+        int fb_offset = fb_offset_base + h * FrameBufferInfo.physicalWidth * FRAMEBUFFER_DEPTH;
 
         for (int w = 0; w < CHAR_PIXEL_WIDTH; w++) {
             int offset = (h * CHAR_PIXEL_WIDTH + w);
@@ -127,9 +134,9 @@ void screen_draw_char(char c, int x, int y) {
             }
 
             // Set all three color channels to white
-            FrameBufferInfo.address[fb_offset + w * 3 + 0] = pixel;
-            FrameBufferInfo.address[fb_offset + w * 3 + 1] = pixel;
-            FrameBufferInfo.address[fb_offset + w * 3 + 2] = pixel;
+            FrameBufferInfo.address[fb_offset + w * FRAMEBUFFER_DEPTH + 0] = pixel;
+            FrameBufferInfo.address[fb_offset + w * FRAMEBUFFER_DEPTH + 1] = pixel;
+            FrameBufferInfo.address[fb_offset + w * FRAMEBUFFER_DEPTH + 2] = pixel;
             //cpu_data_memory_barrier(); 
         }
     }

@@ -1,7 +1,7 @@
 .section .init
 .globl _start
-_start:     # define entrypoint to avoid warning
-# We start in supervisor mode (svc32)
+_start: # define entrypoint to avoid warning
+# We start in supervisor mode (svc32) and secure world
 
 # Disable interrupts
 cpsid i
