@@ -88,25 +88,6 @@ void screen_clear(void) {
     cpu_data_memory_barrier();
 }
 
-void screen_random(void) {
-    cpu_data_memory_barrier();
-    volatile unsigned char* buf = FrameBufferInfo.address;
-    
-
-    for (int y = 0; y < FrameBufferInfo.physicalHeight; y++) {
-        for (int x = 0; x < FrameBufferInfo.physicalWidth; x++) {
-            int offset = (y * FrameBufferInfo.physicalWidth + x) * FRAMEBUFFER_DEPTH;
-            buf[offset] = 0x0F + rnd;     // R
-            buf[offset + 1] = 0x22 ^ rnd; // G
-            buf[offset + 2] = 0xAA - rnd; // B
-        }
-    }
-    rnd++;
-    cpu_data_memory_barrier();    
-}
-
-
-
 /*
  * Draws the given ASCII-similar character on the framebuffer at the given
  * pixel position.
