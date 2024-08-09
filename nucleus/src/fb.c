@@ -16,8 +16,8 @@ struct __attribute__((packed, aligned(16))) fb_info {
     unsigned int bitDepth;        // #20 Bit Depth
     unsigned int x;               // #24 X offset
     unsigned int y;               // #28 Y offset
-    volatile unsigned char* address;       // #32 Address of the framebuffer
-    volatile unsigned int size;            // #36 Size of the framebuffer
+    volatile uint32_t* address;   // #32 Address of the framebuffer
+    volatile unsigned int size;   // #36 Size of the framebuffer
 };
 
 __attribute__((aligned(16), section(".data")))
@@ -34,7 +34,6 @@ static volatile struct fb_info FrameBufferInfo = {
     .size = 0  
 };
 
-static unsigned char rnd = 17;
 static int cursor_x = 1;
 static int cursor_y = 1;
 
@@ -68,7 +67,7 @@ void screen_clear(void) {
     }
     
     // We use the framebuffer address as int pointer
-    volatile uint32_t* buf = (uint32_t*)FrameBufferInfo.address;
+    volatile uint32_t* buf = FrameBufferInfo.address;
 
     // This a 4-byte-word containing one pixel color
     const uint32_t pattern =  
@@ -93,18 +92,21 @@ void screen_clear(void) {
  * pixel position.
  */
 void screen_draw_char(char c, int x, int y) {
-    if (c == 0 || c == '\n')
+    if (c == 0 || c == '\n') {
         return;
+    }
+
+    uint32_t color;
 
     // The right place on the screen
-    int fb_offset_base = (y * FrameBufferInfo.physicalWidth + x) * FRAMEBUFFER_DEPTH;
+    int fb_offset_base = (y * FrameBufferInfo.physicalWidth + x);
 
     // The offset within the char bitmap pixel array
     int ch_offset = c * CHAR_PIXEL_HEIGHT * CHAR_PIXEL_WIDTH;
 
     for (int h = 0; h < CHAR_PIXEL_HEIGHT; h++) {
         // Scroll to next line
-        int fb_offset = fb_offset_base + h * FrameBufferInfo.physicalWidth * FRAMEBUFFER_DEPTH;
+        int fb_offset = fb_offset_base + h * FrameBufferInfo.physicalWidth;
 
         for (int w = 0; w < CHAR_PIXEL_WIDTH; w++) {
             int offset = (h * CHAR_PIXEL_WIDTH + w);
@@ -114,11 +116,11 @@ void screen_draw_char(char c, int x, int y) {
                 continue; // if transparent
             }
 
-            // Set all three color channels to white
-            FrameBufferInfo.address[fb_offset + w * FRAMEBUFFER_DEPTH + 0] = pixel;
-            FrameBufferInfo.address[fb_offset + w * FRAMEBUFFER_DEPTH + 1] = pixel;
-            FrameBufferInfo.address[fb_offset + w * FRAMEBUFFER_DEPTH + 2] = pixel;
-            //cpu_data_memory_barrier(); 
+            // All four color channels have the same color (boring I know)
+            color = (pixel << 24) | (pixel << 16) | (pixel << 8) | pixel;
+
+            // Write the 4-byte-word at the correct location at the framebuffer
+            *((uint32_t*)&(FrameBufferInfo.address[fb_offset + w])) = color;
         }
     }
 }
