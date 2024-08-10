@@ -6,7 +6,7 @@ TARGET ?= armv6
 GNU ?= arm-none-eabi
 
 # Basic C-Compiler Flags for all targets
-CCFLAGS=-Os -Wall -ffreestanding -nostdlib -fno-builtin
+CCFLAGS=-Wall -ffreestanding -nostdlib -fno-builtin
 
 ifeq ($(TARGET),atmega328)
 CCFLAGS+=-mmcu=atmega328
