@@ -1,4 +1,4 @@
-# Target platform (currently armv6 and atmega328)
+# Target platform (currently armv6, armv8a, and atmega328)
 TARGET ?= armv6
 
 # The toolchain to use. arm-none-eabi works, but there does exist 
@@ -15,6 +15,10 @@ endif
 
 ifeq ($(TARGET),armv6)
 CCFLAGS+=-march=armv6
+endif
+
+ifeq ($(TARGET),armv8a)
+CCFLAGS+=-march=armv8-a
 endif
 
 ifdef DEBUG
@@ -47,7 +51,7 @@ OBJECTS := $(patsubst $(SOURCE)%.s,$(BUILD)%.o,$(wildcard $(SOURCE)*.s)) \
 			$(patsubst $(SOURCE)%.c,$(BUILD)%.o,$(wildcard $(SOURCE)*.c)) \
 			$(patsubst $(SOURCE)arch/$(TARGET)/%.s,$(BUILD)%.o,$(wildcard $(SOURCE)arch/$(TARGET)/*.s))
 
-$(info Found source files: $(wildcard $(SOURCE)arch/$(TARGET)/*.s))
+# $(info Found source files: $(wildcard $(SOURCE)arch/$(TARGET)/*.s))
 
 # Rule to make everything.
 all: $(BINARY) $(LIST)
