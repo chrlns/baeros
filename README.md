@@ -5,11 +5,12 @@ computer science students.
 
 ## Prerequisites
 
-For cross-compiling:
-  $ apt install gcc-arm-none-eabi gdb-multiarch
+For cross-compiling on Debian-based Linux-Systems:
+
+    $ apt install gcc-arm-none-eabi gdb-multiarch
 
 ## Compile kernel
-  nucleus $ make
+    $ cd nucleus ; make
 
 Copy baeros.img together with the contents of misc/sd/ on a FAT32 formatted
 SD/SDHC card and use it to boot your Raspberry Pi (currently only Model 1B+ known
@@ -22,10 +23,13 @@ with QEMU yet (raspi support in QEMU seems incomplete).
 
   * Start QEMU with -s -S flags (qemu.sh)
   * Start gdb with arm-none-eabi-gdb
-        * target remote localhost:1234
-        * file kernel/kernel.img
-        * break kmain
-        * continue
+
+Within gdb:
+
+    target remote localhost:1234
+    file nucleus/nucleus.img
+    break kmain
+    continue
 
 ## Links
 Useful links for operating system development especially for the Raspi.
