@@ -8,7 +8,7 @@ BærOS in a nutshell                                        {#baeros-in-a-nutshe
 BærOS is an open-source Unix-like operating system project, designed to be a playground for 
 computer science students (and teachers!). 
 Target platform for BærOS are cheap single board computer (SBC) like the
-[Raspberry Pi](https://www.raspberry-pi.org/).
+[Raspberry Pi](https://www.raspberrypi.com/).
 
 Currently, BærOS is in a very early stage, not much more than a bootloader and a Hello World 
 kernel (called `nucleus`).
@@ -48,4 +48,5 @@ Here follows a introductory description of BaerOS structure as soon it has one.
 Further information                                      {#further-information}
 ===================
 
+Follow the Mastodon tag #baeros for news.
 
