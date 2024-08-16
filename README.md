@@ -9,8 +9,9 @@ For cross-compiling on Debian-based Linux-Systems:
 
     $ apt install gcc-arm-none-eabi gdb-multiarch
 
-## Compile kernel
-    $ cd nucleus ; make
+## Compile kernel (for target ARMv6 like Raspberry Pi 1)
+    $ cd nucleus
+    $ make TARGET=armv6
 
 Copy baeros.img together with the contents of misc/sd/ on a FAT32 formatted
 SD/SDHC card and use it to boot your Raspberry Pi (currently only Model 1B+ known
