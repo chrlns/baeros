@@ -38,5 +38,14 @@ Useful links for operating system development especially for the Raspi.
   * https://www.glennklockwood.com/embedded/bmc2835-gpio.html
   * https://elinux.org/BCM2835_datasheet_errata
   * https://github.com/raspberrypi/firmware/wiki/Mailboxes
+  * https://github.com/Zeke-OS/zeke/blob/master/kern/hal/bcm2835/bcm2835_mailbox.c
+  * https://github.com/werner-matthias/aihPOS/blob/master/kernel/src/debug/framebuffer.rs
   * https://wiki.osdev.org/Raspberry_Pi_Bare_Bones
   * https://elinux.org/RPi_Framebuffer
+  * https://github.com/bztsrc/raspi3-tutorial/tree/master
+  * https://www.raspberrypi.com/documentation/computers/config_txt.html
+  * https://stackoverflow.com/questions/26564178/reading-from-uart-rxd-of-the-raspberry-pi-in-assembly
+  * https://gcc.gnu.org/onlinedocs/gcc/ARM-Options.html
+  * http://www.mathematik.uni-oldenburg.de/personen/tdm/VortragsAbstracts/Schmale/SRT-Division-korrigiert.pdf
+  * https://azeria-labs.com/writing-arm-assembly-part-1/
+  * https://www.valvers.com/open-software/raspberry-pi/bare-metal-programming-in-c-card/
